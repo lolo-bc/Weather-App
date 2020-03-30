@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/6a438b84d3.js" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div id="main">
+    <header>
+        <p><h1>Weather Dashboard</h1></p>
+    </header>
+
+    <section id="weatherDataArea">
+
+        <div id="currentDayArea">
+        <p id="cityNameAppend"><div id="iconAppend"></div></p>
+        <p id="tempAppend"></p>
+        <p id="humidityAppend"></p>
+        <p id="windSpeedAppend"></p>
+        <p id="uvIndexAppend"><div id="uvNumbers"></div></p>
+        </div>
+
+
+
+
+    </section>
+
+    <aside id="searchAside">
+        <p id="searchText">Search for a city</p>
+        <div id="searchBarGeneralArea">
+            <input id="searchBar" type="text"> 
+            <span style="font-size: 23px;"><i  id="searchBtn" class="fas fa-search"></i> </span>
+        </div>
+
+        <div id="yourRescentSearchesList">
+            <ul id="yourRescentSearches" >
+            </ul>
+        </div>
+    </aside>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+    function makeaveragebitches(bitches){
+                    let addthemup = 0;
+
+                    for (let i = 0; i < bitches.length; i++) {
+                        addthemup = bitches[i] + addthemup;
+                    }
+
+                    var average = addthemup / bitches.length;
+                    return average;
+                }
+
+    $('#searchBtn').click(function () {
+        event.preventDefault();
+
+        var APIKey = "73fde90c76c7c9d652ebd9f7b1fd6829";
+        var userCitySearch = $('#searchBar').val()
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + userCitySearch + "&appid=" + APIKey;
+
+
+
+        $.ajax({
+        url: queryURL,
+        method: "GET"
+        }).then(function(response) {
+                console.log(response);
+                console.log(queryURL);
+
+                var cityName = response.name;
+                var humidity = response.main.humidity;
+                var windSpeed = response.wind.speed;
+                var icon = response.weather[0].icon;
+                var lat = response.coord.lat;
+                var lon = response.coord.lon;
+
+
+               
+
+                // get icon URL and make img dynamically 
+                var iconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                var iconImage = $("<img>");
+                iconImage.attr("src", iconURL);
+
+                //convert temp to Farenheight
+                var kelvin = response.main.temp
+                var tempFaren = Math.floor((kelvin - 273.15) * 1.80 + 32);
+
+                
+                $('#yourRescentSearches').after('<li>' + userCitySearch + '</li>')
+                $("#iconAppend").html(iconImage);                
+                $('#cityNameAppend').html(cityName);
+                $('#tempAppend').html("Temperature: " + tempFaren);
+                $('#humidityAppend').html("Humidity: " + humidity);
+                $('#windSpeedAppend').html("Windspeed: " + windSpeed);
+
+
+                 //get UV index
+                 var uvIndexQuery = "http://api.openweathermap.org/data/2.5/uvi?appid=73fde90c76c7c9d652ebd9f7b1fd6829&lat=" + lat + "&lon=" + lon;
+
+                    $.ajax({
+                    url: uvIndexQuery,
+                    method: "GET"
+                    }).then(function(response) {
+                    
+                    var uvValue = response.value;
+                            
+                    $('#uvIndexAppend').html("UV Index: ");
+                    $('#uvNumbers').html(uvValue);
+
+
+                    if (uvValue > 10){
+                    $('#uvNumbers').addClass("extremeUV");
+                    } else if (uvValue < 11 && uvValue > 8){
+                        $('#uvNumbers').addClass("highUV");
+                    } else if (uvValue < 7 && uvValue > 6){
+                        $('#uvNumbers').addClass("kindaHighUV");
+                    } else if (uvValue < 5 && uvValue > 3){
+                        $('#uvNumbers').addClass("moderateUV");
+                    } else {
+                        $('#uvNumbers').addClass("lowUV");
+                    }
+
+                })
+
+                //get five day forecast 
+                var fiveDayCastQuery = "http://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
+
+                    $.ajax({
+                    url: fiveDayCastQuery,
+                    method: "GET"
+                    }).then(function(response) {
+
+                    console.log(fiveDayCastQuery);
+
+                    var dateDuringLoop = new Date();
+                    var arrayOfTemps = [];
+                    var arrayOfHumidity = [];
+                    var todaysIcon;
+
+        
+                    for (let i = 0; i < response.list.length; i++) {
+                        var current = response.list[i];
+                        var epochDate = current.dt;
+                        var regdate = new Date(epochDate * 1000);
+
+                        if(dateDuringLoop.getDate() == regdate.getDate()) {
+                            var todaysTemp = current.main.temp;
+                            var todaysHumidity = current.main.humidity;
+                            arrayOfTemps.push(todaysTemp);
+                            arrayOfHumidity.push(todaysHumidity);
+                            todaysIcon = current.weather[0].icon;
+
+                        } else {
+                            if(dateDuringLoop.getDate() != new Date().getDate()) {
+                                console.log(makeaveragebitches(arrayOfTemps));
+                                console.log(arrayOfHumidity);
+                                console.log(arrayOfTemps);
+                                console.log(todaysIcon);
+                            }
+
+
+                            dateDuringLoop = regdate; 
+                            var todaysTemp = current.main.temp;
+                            var todaysHumidity = current.main.humidity;
+                            arrayOfTemps = [todaysTemp];
+                            arrayOfHumidity = [todaysHumidity];
+                            todaysIcon = current.weather[0].icon;
+
+                        }
+                    
+
+                        // loopDateList.push(TempFromCurrentDataRecord)
+                        // console.log(regdate.getDate());
+
+                    }
+                    console.log(arrayOfHumidity);
+                    console.log(arrayOfTemps);
+                    console.log(todaysIcon);
+
+                    })
+            
+            })
+            
+
+        });
+
+
+
+    </script>
+    </script>    
+</body>
+</html>
+
