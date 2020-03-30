@@ -19,12 +19,16 @@
     <section id="weatherDataArea">
 
         <div id="currentDayArea">
-        <p id="cityNameAppend"><div id="iconAppend"></div></p>
-        <p id="tempAppend"></p>
-        <p id="humidityAppend"></p>
-        <p id="windSpeedAppend"></p>
-        <p id="uvIndexAppend"><div id="uvNumbers"></div></p>
+            <p id="cityNameAppend"><div id="iconAppend"></div></p>
+            <p id="tempAppend"></p>
+            <p id="humidityAppend"></p>
+            <p id="windSpeedAppend"></p>
+            <p id="uvIndexAppend"><div id="uvNumbers"></div></p>
         </div>
+
+        <container id="upcomingDaysArea">
+
+        </container>
 
 
 
@@ -49,75 +53,93 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript">
 
-    function makeaveragebitches(bitches){
-                    let addthemup = 0;
+        function averagesFunc(arrayInfo){
+            let addthemup = 0;
 
-                    for (let i = 0; i < bitches.length; i++) {
-                        addthemup = bitches[i] + addthemup;
-                    }
+            for (let i = 0; i < arrayInfo.length; i++) {
+                addthemup = arrayInfo[i] + addthemup;
+            }
+            var average = addthemup / arrayInfo.length;
+            return average;
+        }
 
-                    var average = addthemup / bitches.length;
-                    return average;
-                }
 
-    $('#searchBtn').click(function () {
-        event.preventDefault();
+        function convertKtoF(kNumber) {
+            let farenTemp = Math.floor((kNumber - 273.15) * 1.80 + 32);
+            return farenTemp;
+        }
+
+        // if (JSON.parse(localStorage.getItem('mostRescentSearch'))) {
+        //     userCitySearch = JSON.parse(localStorage.getItem('mostRescentSearch'));
+        //     getWeatherData();
+        // } 
+    
+    
+
+    $('#searchBtn').click(getWeatherData);
+
+    function getWeatherData() {
+
+
+        $('#upcomingDaysArea').empty();
+        $("#currentDayArea").css("display", "block");
+
 
         var APIKey = "73fde90c76c7c9d652ebd9f7b1fd6829";
         var userCitySearch = $('#searchBar').val()
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + userCitySearch + "&appid=" + APIKey;
 
+    
 
+            $.ajax({
+            url: queryURL,
+            method: "GET"
+            }).then(function(response) {
 
-        $.ajax({
-        url: queryURL,
-        method: "GET"
-        }).then(function(response) {
                 console.log(response);
-                console.log(queryURL);
 
+                //set variables 
                 var cityName = response.name;
                 var humidity = response.main.humidity;
                 var windSpeed = response.wind.speed;
                 var icon = response.weather[0].icon;
                 var lat = response.coord.lat;
                 var lon = response.coord.lon;
+                var currentDate = new Date();
 
-
-               
 
                 // get icon URL and make img dynamically 
                 var iconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
-                var iconImage = $("<img>");
-                iconImage.attr("src", iconURL);
+                var IconImage = $("<img>");
+                IconImage.attr("src", iconURL);
 
                 //convert temp to Farenheight
                 var kelvin = response.main.temp
                 var tempFaren = Math.floor((kelvin - 273.15) * 1.80 + 32);
 
-                
+                //apend information to html 
                 $('#yourRescentSearches').after('<li>' + userCitySearch + '</li>')
-                $("#iconAppend").html(iconImage);                
-                $('#cityNameAppend').html(cityName);
+                $("#iconAppend").html(IconImage);                
+                $('#cityNameAppend').html(cityName + " " + currentDate.toLocaleDateString());
                 $('#tempAppend').html("Temperature: " + tempFaren);
                 $('#humidityAppend').html("Humidity: " + humidity);
                 $('#windSpeedAppend').html("Windspeed: " + windSpeed);
 
 
-                 //get UV index
-                 var uvIndexQuery = "http://api.openweathermap.org/data/2.5/uvi?appid=73fde90c76c7c9d652ebd9f7b1fd6829&lat=" + lat + "&lon=" + lon;
+            //get UV index API
+            var uvIndexQuery = "http://api.openweathermap.org/data/2.5/uvi?appid=73fde90c76c7c9d652ebd9f7b1fd6829&lat=" + lat + "&lon=" + lon;
 
-                    $.ajax({
-                    url: uvIndexQuery,
-                    method: "GET"
-                    }).then(function(response) {
+                $.ajax({
+                url: uvIndexQuery,
+                method: "GET"
+                }).then(function(response) {
                     
                     var uvValue = response.value;
                             
                     $('#uvIndexAppend').html("UV Index: ");
                     $('#uvNumbers').html(uvValue);
 
-
+                    // change background color depending on severity of UV 
                     if (uvValue > 10){
                     $('#uvNumbers').addClass("extremeUV");
                     } else if (uvValue < 11 && uvValue > 8){
@@ -133,66 +155,96 @@
                 })
 
                 //get five day forecast 
-                var fiveDayCastQuery = "http://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
+            
+            //get Upcoming Weather API 
+            var fiveDayCastQuery = "http://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
 
-                    $.ajax({
-                    url: fiveDayCastQuery,
-                    method: "GET"
-                    }).then(function(response) {
+                $.ajax({
+                url: fiveDayCastQuery,
+                method: "GET"
+                }).then(function(response) {
 
-                    console.log(fiveDayCastQuery);
-
+                    //set variables and empty arrays to hold information
                     var dateDuringLoop = new Date();
                     var arrayOfTemps = [];
                     var arrayOfHumidity = [];
                     var todaysIcon;
 
-        
+                    //lop through all the data for each day
                     for (let i = 0; i < response.list.length; i++) {
                         var current = response.list[i];
                         var epochDate = current.dt;
                         var regdate = new Date(epochDate * 1000);
 
                         if(dateDuringLoop.getDate() == regdate.getDate()) {
-                            var todaysTemp = current.main.temp;
-                            var todaysHumidity = current.main.humidity;
-                            arrayOfTemps.push(todaysTemp);
-                            arrayOfHumidity.push(todaysHumidity);
-                            todaysIcon = current.weather[0].icon;
+                               //when API brings back weather for the current day, do nothing (info at top) 
 
                         } else {
+
                             if(dateDuringLoop.getDate() != new Date().getDate()) {
-                                console.log(makeaveragebitches(arrayOfTemps));
-                                console.log(arrayOfHumidity);
-                                console.log(arrayOfTemps);
-                                console.log(todaysIcon);
+
+                                //get data and set variables
+                                upcomingTempK = averagesFunc(arrayOfTemps);
+                                upcomingTempF = convertKtoF(upcomingTempK);
+                                upcomingHumidity = averagesFunc(arrayOfHumidity);
+                                upcomingDate = regdate.toLocaleDateString();
+
+
+                                // get icon URL and make img dynamically 
+                                var upcomingiconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                                var upcomingIconImage = $("<img>");
+                                upcomingIconImage.attr("src", upcomingiconURL);
+                                
+                                var eachDayContainer = $("<div>");
+
+                                //append upcoming weather info 
+                                // $('#upcomingDaysArea').add('#upcomingDaysArea').addClass("upcomingDaysArea");
+
+                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  +  '<br>' + "Temperature: " + upcomingTempF + '<br>' + "Humidity: " + upcomingHumidity + '<br>' +'</div');
+                                
+                                $('#upcomingDaysArea').append(eachDayContainer);
+                                
+                        
                             }
 
-
+                            // set data variables to use for the last day (loop stops early)
                             dateDuringLoop = regdate; 
                             var todaysTemp = current.main.temp;
                             var todaysHumidity = current.main.humidity;
                             arrayOfTemps = [todaysTemp];
                             arrayOfHumidity = [todaysHumidity];
                             todaysIcon = current.weather[0].icon;
-
                         }
-                    
-
-                        // loopDateList.push(TempFromCurrentDataRecord)
-                        // console.log(regdate.getDate());
 
                     }
-                    console.log(arrayOfHumidity);
-                    console.log(arrayOfTemps);
-                    console.log(todaysIcon);
+                        //append the information for the 5th day
+                          //get data and set variables
+                                upcomingTempK = averagesFunc(arrayOfTemps);
+                                upcomingTempF = convertKtoF(upcomingTempK);
+                                upcomingHumidity = averagesFunc(arrayOfHumidity);
+                                upcomingDate = regdate.toLocaleDateString();
 
+
+                                // get icon URL and make img dynamically 
+                                var upcomingiconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                                var upcomingIconImage = $("<img>");
+                                upcomingIconImage.attr("src", upcomingiconURL);
+                                
+
+                                //append upcoming weather info 
+                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  + '<br>' + "Temperature: " + upcomingTempF + '<br>' + "Humidity: " + upcomingHumidity + '<br>' +'</div');
+                                
+                                $('#upcomingDaysArea').append(eachDayContainer);
+
+                    
                     })
             
             })
             
+            $('#searchBar').val(' ');
+            localStorage.setItem("mostRescentSearch", JSON.stringify(userCitySearch));
 
-        });
+        };
 
 
 
