@@ -119,7 +119,7 @@
 
 
                 // get icon URL and make img dynamically 
-                var iconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                var iconURL = "https://openweathermap.org/img/wn/" + icon + "@2x.png";
                 var IconImage = $("<img>");
                 IconImage.attr("src", iconURL);
 
@@ -146,7 +146,7 @@
 
 
             //get UV index API
-            var uvIndexQuery = "http://api.openweathermap.org/data/2.5/uvi?appid=73fde90c76c7c9d652ebd9f7b1fd6829&lat=" + lat + "&lon=" + lon;
+            var uvIndexQuery = "https://api.openweathermap.org/data/2.5/uvi?appid=73fde90c76c7c9d652ebd9f7b1fd6829&lat=" + lat + "&lon=" + lon;
 
                 $.ajax({
                 url: uvIndexQuery,
@@ -176,7 +176,7 @@
 
                
             //get Upcoming Weather API for 5 day forcast 
-            var fiveDayCastQuery = "http://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
+            var fiveDayCastQuery = "https://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
 
                 $.ajax({
                 url: fiveDayCastQuery,
@@ -210,7 +210,7 @@
 
 
                                 // get icon URL and make img dynamically 
-                                var upcomingiconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                                var upcomingiconURL = "https://openweathermap.org/img/wn/" + icon + "@2x.png";
                                 var upcomingIconImage = $("<img>");
                                 upcomingIconImage.attr("src", upcomingiconURL);
                                 
@@ -243,7 +243,7 @@
 
 
                                 // get icon URL and make img dynamically 
-                                var upcomingiconURL = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                                var upcomingiconURL = "https://openweathermap.org/img/wn/" + icon + "@2x.png";
                                 var upcomingIconImage = $("<img>");
                                 upcomingIconImage.attr("src", upcomingiconURL);
                                 
