@@ -3,80 +3,81 @@ body {
 }
 
 header {
-    background-color: darkslateblue;
+    background-color: rgb(4, 28, 34);
+    letter-spacing: 3.5px;
     margin: 0px;
     text-align: center;
-    padding: 2rem;
-    color: floralwhite;
-    font-size: 1.5em;
+    padding: 2em;
+    color: rgb(240, 248, 248);
+    font-size: 1.8em;
+
 }
 h1 {
     font-size: 40px;
 }
 
 #main {
-    display: inline;
+    display: flex;
+    
 }
 #searchAside {
-    background-color: gainsboro;
-    float: left;
-    width: 20%;
+    flex-basis: auto;
+    order: 1;
     height: 100vh;
     padding: 20px;
     font-size: 20px;
 }
 
 #weatherDataArea {
+    background-color: rgb(248, 255, 255);
     width: 75%;
-    float: right;
-    text-align: left;
     padding: 10px;
+    order: 2;
+
 }
 
 #searchText {
     padding-bottom: 10px;
+    color: rgb(4, 28, 34);
+    font-size: 20px;
 }
 
 #searchBar {
     font-size: 23px;
     margin-bottom: 10px;
+    width: 79%;
 }
 
 .fa-search {
-    background-color: darkslateblue;
+    background-color: rgb(139, 195, 202);
     padding: 4px;
     color: floralwhite;
 }
 
-/* #searchBtn i:hover {
-    font-size: 30px;
+#searchBtn:hover {
+    font-size: 25px;
     transition: all .3s ease-in-out;
-  } */
+  }
 
   li {
     list-style: none;
-    background-color: white;
+    background-color: rgb(139, 195, 202);
+    color: white;
     text-transform: uppercase;
     padding: 10px;
     font-size: 18px;
     margin-bottom: 10px;
   }
 
-  #cityNameAppend {
-      font-size: 30px;
-      display: inline;
-  }
-  
-  #iconAppend {
-      display: inline;
-  }
-
-  img {
-      width: 50px;
-      height: 50px;
+li:hover {
+    font-size: 22px;
+    font-weight: bold;
+    transition: all .3s ease-in-out;
   }
 
 #currentDayArea {
+    background-color: rgb(49, 94, 105);
+    color: white;
     margin: 10px;
     padding-left: 10px;
     line-height: 50px;
@@ -85,8 +86,28 @@ h1 {
     border-style: solid;
     border-color: rgb(211, 209, 209);
     border-width: 1px;
-    display: none;
 
+}
+.currentDayStyles {
+    font-size: 23px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#cityNameAppend {
+    font-weight: bolder;
+    font-size: 30px;
+    display: inline;
+    text-transform: uppercase;
+}
+  
+#iconAppend {
+      display: inline;
+  }
+
+#iconAppend img {
+      width: 50px;
+      height: 50px;
 }
 
 #uvIndexAppend {
@@ -98,45 +119,39 @@ h1 {
 }
 
 .lowUV {
-    color: white;
-    padding: 3px;
-    border-radius: 8px;
-    background-color: green;
+    font-size: 23px;
+    color: rgb(123, 214, 123);
 }
 
 .moderateUV {
-    color: white;
-    padding: 3px;
-    border-radius: 8px;
-    background-color: yellow;
+    font-size: 23px;
+    color: rgb(236, 236, 95);
 }
  
 .kindaHighUV {
-    color: white;
-    padding: 3px;
-    border-radius: 8px;
-    background-color: orange;
+    font-size: 23px;
+    color: rgb(243, 161, 8);
 }
 
 .highUV {
-    color: white;
-    padding: 3px;
-    border-radius: 8px;
-    background-color: red;
+    font-size: 23px;
+    color: rgb(212, 17, 17);
 }
 
 .extremeUV {
-    color: white;
-    padding: 3px;
-    border-radius: 8px;
-    background-color: rebeccapurple;
+    font-size: 23px;
+    color: rebeccapurple;
 }
 
 #upcomingDaysArea div{
     display: inline-block;
-    background-color: darkslateblue;
+    background-color: rgb(139, 195, 202);
     color: white;
     line-height: 30px;
-    margin: 20px;
+    margin: 14px;
     padding: 20px;
+}
+
+.futureDays {
+    background-color: hotpink;
 }

@@ -11,48 +11,59 @@
 
 </head>
 <body>
-    <div id="main">
+    
     <header>
-        <p><h1>Weather Dashboard</h1></p>
+        <p><h1>WEATHER DASHBOARD</h1></p>
     </header>
 
-    <section id="weatherDataArea">
+    <div id="main">
+        
+        <section id="weatherDataArea">
+            <!-- empty areas to add current weather data -->
+            <div id="currentDayArea">
+                <p class="currentDayStyles" id="cityNameAppend"><div id="iconAppend"></div></p>
+                <p class="currentDayStyles" id="tempAppend"></p>
+                <p class="currentDayStyles" id="humidityAppend"></p>
+                <p class="currentDayStyles" id="windSpeedAppend"></p>
+                <p class="currentDayStyles" id="uvIndexAppend"><div id="uvNumbers"></div></p>
+            </div>
+            <!-- empty area for 5 day forcast to add to -->
+            <container id="upcomingDaysArea">
 
-        <div id="currentDayArea">
-            <p id="cityNameAppend"><div id="iconAppend"></div></p>
-            <p id="tempAppend"></p>
-            <p id="humidityAppend"></p>
-            <p id="windSpeedAppend"></p>
-            <p id="uvIndexAppend"><div id="uvNumbers"></div></p>
-        </div>
+            </container>
 
-        <container id="upcomingDaysArea">
+     </section>
 
-        </container>
+    <!-- search bar and area to append recent searches to  -->
+        <aside id="searchAside">
+            <p id="searchText">SEARCH FOR A CITY</p>
 
+            <!-- search bar and button -->
+            <div id="searchBarGeneralArea">
+                <input id="searchBar" type="text"> 
+                <span style="font-size: 23px;"><i  id="searchBtn" class="fas fa-search"></i> </span>
+            </div>
 
+            <!-- list to append recent searches -->
+            <div id="yourRescentSearchesList">
+                <ul id="yourRescentSearches" >
+                </ul>
+            </div>
 
+        </aside>
 
-    </section>
-
-    <aside id="searchAside">
-        <p id="searchText">Search for a city</p>
-        <div id="searchBarGeneralArea">
-            <input id="searchBar" type="text"> 
-            <span style="font-size: 23px;"><i  id="searchBtn" class="fas fa-search"></i> </span>
-        </div>
-
-        <div id="yourRescentSearchesList">
-            <ul id="yourRescentSearches" >
-            </ul>
-        </div>
-    </aside>
     </div>
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript">
 
+        //this value is so important, gets used everywhere essentially
+        var userCitySearch = $('#searchBar').val();
+
+        // the five day forecase brings back an array of data for every three hours, 
+        // this function averages them to get one for each day 
         function averagesFunc(arrayInfo){
             let addthemup = 0;
 
@@ -63,40 +74,39 @@
             return average;
         }
 
-
+        //get Farnheight from Kelvin
         function convertKtoF(kNumber) {
             let farenTemp = Math.floor((kNumber - 273.15) * 1.80 + 32);
             return farenTemp;
         }
 
-        // if (JSON.parse(localStorage.getItem('mostRescentSearch'))) {
-        //     userCitySearch = JSON.parse(localStorage.getItem('mostRescentSearch'));
-        //     getWeatherData();
-        // } 
-    
-    
+        // get most recent search from local storage and call the function to get and populate data
+        if (JSON.parse(localStorage.getItem('mostRescentSearch'))) {
+            userCitySearch = JSON.parse(localStorage.getItem('mostRescentSearch'));
+            getWeatherData(userCitySearch);
+            var newLI = $('<li id="'+ userCitySearch + '" >' + userCitySearch + '</li>');
+            $('#yourRescentSearches').prepend(newLI);
+            newLI.click(function(){
+                getWeatherData(userCitySearch);
+            });
+        } 
 
-    $('#searchBtn').click(getWeatherData);
+        //this fucntion pulls data from 3 APIs to get and append data for Current Weather, UV Index, and 5 day forecast
+        function getWeatherData(searchTerm) {
 
-    function getWeatherData() {
+            //removes the data from the previous search 
+            $('#upcomingDaysArea').empty();
 
+            //info needed to get API data for current day 
+            var APIKey = "73fde90c76c7c9d652ebd9f7b1fd6829";
+            var userCitySearch = searchTerm || $('#searchBar').val();
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + userCitySearch + "&appid=" + APIKey;
 
-        $('#upcomingDaysArea').empty();
-        $("#currentDayArea").css("display", "block");
-
-
-        var APIKey = "73fde90c76c7c9d652ebd9f7b1fd6829";
-        var userCitySearch = $('#searchBar').val()
-        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + userCitySearch + "&appid=" + APIKey;
-
-    
-
-            $.ajax({
-            url: queryURL,
-            method: "GET"
-            }).then(function(response) {
-
-                console.log(response);
+                //Response for current data
+                $.ajax({
+                url: queryURL,
+                method: "GET"
+                }).then(function(response) {
 
                 //set variables 
                 var cityName = response.name;
@@ -117,13 +127,22 @@
                 var kelvin = response.main.temp
                 var tempFaren = Math.floor((kelvin - 273.15) * 1.80 + 32);
 
-                //apend information to html 
-                $('#yourRescentSearches').after('<li>' + userCitySearch + '</li>')
+                //Apend recent search if this is not a get from local storage event 
+                if(!searchTerm) {
+                    var newLI = $('<li id="'+ userCitySearch + '" >' + userCitySearch + '</li>');
+                    $('#yourRescentSearches').prepend(newLI);
+                    newLI.click(function(){
+                        getWeatherData(userCitySearch);
+                    });
+                }
+                //
+                //populate the HTML with the data 
                 $("#iconAppend").html(IconImage);                
                 $('#cityNameAppend').html(cityName + " " + currentDate.toLocaleDateString());
-                $('#tempAppend').html("Temperature: " + tempFaren);
-                $('#humidityAppend').html("Humidity: " + humidity);
-                $('#windSpeedAppend').html("Windspeed: " + windSpeed);
+                $('#tempAppend').html("Temperature: " + tempFaren + "\u00B0" + "F");
+                $('#humidityAppend').html("Humidity: " + humidity + "%");
+                $('#windSpeedAppend').html("Windspeed: " + windSpeed + " MPH");
+
 
 
             //get UV index API
@@ -154,9 +173,9 @@
 
                 })
 
-                //get five day forecast 
-            
-            //get Upcoming Weather API 
+
+               
+            //get Upcoming Weather API for 5 day forcast 
             var fiveDayCastQuery = "http://api.openweathermap.org/data/2.5/forecast?q=" + userCitySearch + "&appid=" + APIKey;
 
                 $.ajax({
@@ -170,24 +189,24 @@
                     var arrayOfHumidity = [];
                     var todaysIcon;
 
-                    //lop through all the data for each day
+                    //loop through all the data for each day
                     for (let i = 0; i < response.list.length; i++) {
                         var current = response.list[i];
                         var epochDate = current.dt;
                         var regdate = new Date(epochDate * 1000);
 
+
                         if(dateDuringLoop.getDate() == regdate.getDate()) {
-                               //when API brings back weather for the current day, do nothing (info at top) 
+                               //when API brings back weather for the current day, do nothing
 
                         } else {
-
                             if(dateDuringLoop.getDate() != new Date().getDate()) {
 
                                 //get data and set variables
                                 upcomingTempK = averagesFunc(arrayOfTemps);
                                 upcomingTempF = convertKtoF(upcomingTempK);
                                 upcomingHumidity = averagesFunc(arrayOfHumidity);
-                                upcomingDate = regdate.toLocaleDateString();
+                                upcomingDate = regdate.toDateString();
 
 
                                 // get icon URL and make img dynamically 
@@ -195,16 +214,13 @@
                                 var upcomingIconImage = $("<img>");
                                 upcomingIconImage.attr("src", upcomingiconURL);
                                 
+                                //create new div so that each day can be its own little box
                                 var eachDayContainer = $("<div>");
 
                                 //append upcoming weather info 
-                                // $('#upcomingDaysArea').add('#upcomingDaysArea').addClass("upcomingDaysArea");
-
-                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  +  '<br>' + "Temperature: " + upcomingTempF + '<br>' + "Humidity: " + upcomingHumidity + '<br>' +'</div');
-                                
+                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  + '<br>' + "Temperature: " + upcomingTempF + "\u00B0" + "F" + '<br>' + "Humidity: " + upcomingHumidity + "%" +'<br>' +'</div');
                                 $('#upcomingDaysArea').append(eachDayContainer);
                                 
-                        
                             }
 
                             // set data variables to use for the last day (loop stops early)
@@ -218,11 +234,12 @@
 
                     }
                         //append the information for the 5th day
-                          //get data and set variables
+
+                            //get data and set variables
                                 upcomingTempK = averagesFunc(arrayOfTemps);
                                 upcomingTempF = convertKtoF(upcomingTempK);
                                 upcomingHumidity = averagesFunc(arrayOfHumidity);
-                                upcomingDate = regdate.toLocaleDateString();
+                                upcomingDate = regdate.toDateString();
 
 
                                 // get icon URL and make img dynamically 
@@ -232,8 +249,7 @@
                                 
 
                                 //append upcoming weather info 
-                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  + '<br>' + "Temperature: " + upcomingTempF + '<br>' + "Humidity: " + upcomingHumidity + '<br>' +'</div');
-                                
+                                eachDayContainer = ('<div>' + upcomingDate + '<br>' + '<img src="' + upcomingIconImage[0].src + '"/>'  + '<br>' + "Temperature: " + upcomingTempF + "\u00B0" + "F" + '<br>' + "Humidity: " + upcomingHumidity + "%" +'<br>' +'</div');
                                 $('#upcomingDaysArea').append(eachDayContainer);
 
                     
@@ -241,13 +257,19 @@
             
             })
             
+            //removes the data from the search bar so that duplicate searches cannot appear in the recent searches
             $('#searchBar').val(' ');
+
+            //set the city searched in local storage so that we can call the function with it on page load 
             localStorage.setItem("mostRescentSearch", JSON.stringify(userCitySearch));
 
         };
 
+        $('#searchBtn').click(function(){
+            getWeatherData();
+        });
 
-
+    
     </script>
     </script>    
 </body>
